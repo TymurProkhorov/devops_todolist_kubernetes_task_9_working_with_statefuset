@@ -3,7 +3,7 @@
 ### 1. Verify namespace
 
     kubectl get ns
-Expect myя sql namespace to be present.
+Expect mysql namespace to be present.
 ### 2. Check StatefulSet and pods
 
     kubectl get statefulset -n mysql
@@ -11,8 +11,8 @@ Expect myя sql namespace to be present.
 Expect 3 pods: mysql-0, mysql-1, mysql-2.
 
 ### 3. Verify secrets
-    kubectl get secret st-secret -n mysql -o yaml
-Expect 3 secrets: MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD.
+    kubectl get secret mysql-secrets -n mysql -o yaml
+Expect 3 keys: MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD.
 
 ### 4. Check probes
     kubectl describe pod mysql-0 -n mysql | grep Liveness
