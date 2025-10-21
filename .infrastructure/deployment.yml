@@ -47,22 +47,37 @@ spec:
             secretKeyRef:
               name: app-secret
               key: SECRET_KEY
-        - name: DB_CONNECTION
+        - name: NAME
           valueFrom:
             secretKeyRef:
-              name: app-secret
-              key: DB_CONNECTION
+              name: app-db-secret
+              key: NAME
+        - name: USER
+          valueFrom:
+            secretKeyRef:
+              name: app-db-secret
+              key: USER
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-db-secret
+              key: PASSWORD
+        - name: HOST
+          valueFrom:
+            secretKeyRef:
+              name: app-db-secret
+              key: HOST
         ports:
         - containerPort: 8080
         livenessProbe:
           httpGet:
-            path: api/health
+            path: /api/health
             port: 8080
           initialDelaySeconds: 60
           periodSeconds: 5
         readinessProbe:
           httpGet:
-            path: api/ready
+            path: /api/ready
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 5

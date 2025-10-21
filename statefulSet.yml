@@ -41,13 +41,15 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/mysql
-              subPath: mysql
             - name: mysql-config
               mountPath: /docker-entrypoint-initdb.d
           resources:
             requests:
               cpu: 500m
               memory: 1Gi
+          limits:
+            cpu: 250m
+            memory: 500Mi
           livenessProbe:
             exec:
               command: ["mysqladmin", "ping"]
@@ -62,6 +64,8 @@ spec:
             timeoutSeconds: 1
       volumes:
         - name: mysql-config
+          configMap:
+            name: mysql-config
   volumeClaimTemplates:
     - metadata:
         name: data

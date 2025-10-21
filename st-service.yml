@@ -9,4 +9,4 @@ spec:
   ports:
     - name: mysql
       port: 3306
-  clusterIp: None
+  clusterIP: None
