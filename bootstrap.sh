@@ -2,8 +2,7 @@
 
 set -euo pipefail
 
-docker build -t ikulyk404/todoapp:3.0.0 .
-docker push ikulyk404/todoapp:3.0.0
+kind load docker-image ikulyk404/todoapp:3.0.0
 
 kind create cluster --config cluster.yml
 
@@ -11,11 +10,11 @@ kubectl create namespace mysql --dry-run=client -o yaml | kubectl apply -f -
 kubectl create namespace todoapp --dry-run=client -o yaml | kubectl apply -f -
 
 kubectl apply -f st-secret.yml -n mysql
-kubectl apply -f st-configmap.yml -n mysql
+kubectl apply -f st-configMap.yml -n mysql
 kubectl apply -f st-service.yml -n mysql
-kubectl apply -f statefulset.yml -n mysql
+kubectl apply -f statefulSet.yml -n mysql
 
-kubectl rollout status statefulset/mysql -n mysql
+kubectl rollout status statefulSet/mysql -n mysql
 
 kubectl apply -f .infrastructure/secret.yml -n todoapp
 kubectl apply -f .infrastructure/deployment.yml -n todoapp

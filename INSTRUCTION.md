@@ -21,9 +21,11 @@ Expect all required namespaces, StatefulSet, and Deployments to be created.
 Expect mysql namespace to be present.
 ### 2. Check StatefulSet and pods
 
-    kubectl get statefulset -n mysql
     kubectl get pods -n mysql -o wide
 Expect 3 pods: mysql-0, mysql-1, mysql-2.
+
+    kubectl get statefulset mysql -n mysql -o yaml | grep -i "replicas"
+Expect amount of replicas is 3.
 
 ### 3. Verify secrets
     kubectl get secret mysql-secrets -n mysql -o yaml
@@ -44,17 +46,29 @@ Expect both liveness and readiness probes to be defined.
 Expect file init.sql to be present.
 
 ### 6. Validate database
-6.1 Validate database
+6.1 Decode MySQL Secret
 
-    kubectl exec -it mysql-0 -n mysql -- mysql -u root -p<MYSQL_ROOT_PASSWORD> app_db -e "SHOW TABLES;"
-    kubectl exec -it mysql-0 -n mysql -- mysql -u root -p<MYSQL_ROOT_PASSWORD> app_db -e "INSERT INTO users (username) VALUES ('user1');"
-    kubectl exec -it mysql-0 -n mysql -- mysql -u root -p<MYSQL_ROOT_PASSWORD> app_db -e "SELECT * FROM users;"
+    MYSQL_ROOT_PASSWORD=$(kubectl get secret mysql-secrets -n mysql -o jsonpath="{.data.MYSQL_ROOT_PASSWORD}" | base64 --decode)
+
+6.2 Validate database
+
+    kubectl exec -it mysql-0 -n mysql -- mysql -u root -p$MYSQL_ROOT_PASSWORD app_db -e "SHOW TABLES;"
+    kubectl exec -it mysql-0 -n mysql -- mysql -u root -p$MYSQL_ROOT_PASSWORD app_db -e "INSERT INTO users (username) VALUES ('user1');"
+    kubectl exec -it mysql-0 -n mysql -- mysql -u root -p$MYSQL_ROOT_PASSWORD app_db -e "SELECT * FROM users;"
 Expect output to include: user1.
 
-6.2 Decode MySQL Secret
+6.3 Validate that the application Deployment consumes DB connection values from the Secret and that HOST resolves to the 0-index pod (mysql-0)
 
-    kubectl get secret mysql-secrets -n mysql -o jsonpath="{.data.MYSQL_ROOT_PASSWORD}" | base64 --decode
+    kubectl get pods -n todoapp
+    kubectl exec -n todoapp <pod> -- printenv HOST
+Expect name: mysql-0.mysql
+
+6.4 Confirm successful DB connection
+
+    kubectl logs -n todoapp deployment/todoapp
+
 
 ### 7. Validate headless-service and PVC
     kubectl get pvc -n mysql
-    kubectl get svc -n mysql
+    kubectl get svc mysql -n mysql -o yaml | grep clusterIP
+Expect output is None.
